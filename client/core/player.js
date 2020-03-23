@@ -47,8 +47,7 @@ class Player extends Object3D {
         hand.setFinger('middle', false);
       };
       controller.addEventListener('connected', ({ data: { handedness } }) => {
-        const hand = new Hand({ mirrored: handedness === 'right' });
-        hand.handedness = handedness;
+        const hand = new Hand({ handedness });
         controller.hand = hand;
         controller.add(hand);
         controller.addEventListener('selectstart', onSelectStart);
