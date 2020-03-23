@@ -17,10 +17,15 @@ class Room extends Scene {
     this.auxVector = new Vector3();
 
     this.player = new Player({ camera, xr });
-    this.add(this.player);
     this.player.controllers.forEach(({ marker }) => (
       this.add(marker)
     ));
+    this.player.position.set(
+      Math.floor(Math.random() * 4) - 2,
+      0,
+      Math.floor(Math.random() * 4) - 2
+    );
+    this.add(this.player);
 
     this.peers = new Peers();
     this.add(this.peers);
