@@ -24,4 +24,4 @@ COPY client/ client/
 USER node
 
 # Start server
-CMD [ "forever", "src/index.js" ]
+CMD [ "forever", "server/main.js" ]
