@@ -14,7 +14,7 @@ import {
 
 class Display extends InstancedMesh {
   static setupGeometry() {
-    const pixel = new BoxGeometry(0.175, 0.16, 0.05);
+    const pixel = new BoxGeometry(0.175, 0.175, 0.05);
     pixel.faces.splice(10, 2);
     pixel.faces.forEach((face, i) => {
       if (i % 2 === 1) {
