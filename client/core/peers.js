@@ -7,8 +7,9 @@ import Peer from '../renderables/peer.js';
 class Peers extends Object3D {
   constructor() {
     super();
-    this.audio = new Audio();
-    this.audio.onStream = this.onStream.bind(this);
+    this.audio = new Audio({
+      onStream: this.onStream.bind(this),
+    });
     this.peers = [];
   }
 
@@ -22,12 +23,11 @@ class Peers extends Object3D {
     this.broadcast(player);
   }
 
-  onStream(stream) {
-    const { peers } = this;
-    this.stream = stream;
+  onStream() {
+    const { audio, peers } = this;
     peers.forEach(({ connection }) => {
       if (!connection.destroyed) {
-        connection.addStream(stream);
+        connection.addStream(audio.userMedia);
       }
     });
   }
@@ -63,10 +63,10 @@ class Peers extends Object3D {
   }
 
   connect({ id, initiator = false }) {
-    const { audio, server, stream } = this;
+    const { audio, server } = this;
     const connection = new SimplePeer({
       initiator,
-      stream,
+      stream: audio.userMedia,
     });
     const peer = new Peer({ peer: id, connection });
     connection.on('error', () => {});

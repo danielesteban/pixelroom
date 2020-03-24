@@ -4,9 +4,6 @@ FROM node:erbium
 ENV NODE_ENV=production
 RUN npm install --global forever
 
-# Set the timezone
-RUN rm -f /etc/localtime && ln -s /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-
 # Create working directory
 RUN mkdir -p /usr/src/pixelroom
 WORKDIR /usr/src/pixelroom

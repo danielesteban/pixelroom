@@ -1,10 +1,18 @@
 // Audio stream manager
 
 class Audio {
-  constructor() {
+  constructor({ onStream }) {
     this.players = [];
     this.onFirstInteraction = this.onFirstInteraction.bind(this);
     window.addEventListener('mousedown', this.onFirstInteraction);
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        this.userMedia = stream;
+        if (onStream) {
+          onStream();
+        }
+      })
+      .catch(() => {});
   }
 
   onFirstInteraction() {
@@ -12,14 +20,6 @@ class Audio {
     window.removeEventListener('mousedown', this.onFirstInteraction);
     this.isReady = true;
     players.forEach((player) => (player.play()));
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        this.stream = stream;
-        if (this.onStream) {
-          this.onStream(stream);
-        }
-      })
-      .catch(() => {});
   }
 
   addStream(stream) {
