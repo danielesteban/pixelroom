@@ -98,9 +98,9 @@ class Player extends Object3D {
         buttons[axis] = value;
       });
       hand.setFingers({
-        thumb: !!gamepad.buttons[3].touched,
-        index: !!gamepad.buttons[0].touched,
-        middle: !!gamepad.buttons[1].touched,
+        thumb: gamepad.buttons[3] && gamepad.buttons[3].touched,
+        index: gamepad.buttons[0] && gamepad.buttons[0].touched,
+        middle: gamepad.buttons[1] && gamepad.buttons[1].touched,
       });
       hand.animate({ delta });
       marker.visible = false;
