@@ -28,7 +28,16 @@ class Player extends Object3D {
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = xr.getController(i);
       this.add(controller);
-      const buttons = {};
+      const buttons = {
+        forwards: false,
+        backwards: false,
+        leftwards: false,
+        rightwards: false,
+        trigger: false,
+        grip: false,
+        primary: false,
+        secondary: false,
+      };
       controller.getButtons = () => {
         const frame = { ...buttons };
         Object.keys(buttons).forEach((id) => {
