@@ -1,9 +1,5 @@
 FROM node:erbium
 
-# Install forever
-ENV NODE_ENV=production
-RUN npm install --global forever
-
 # Create working directory
 RUN mkdir -p /usr/src/pixelroom
 WORKDIR /usr/src/pixelroom
@@ -24,4 +20,4 @@ RUN mkdir data && chown node:node data
 USER node
 
 # Start server
-CMD [ "forever", "--killSignal=SIGTERM", "server/main.js" ]
+CMD [ "node", "server/main.js" ]
