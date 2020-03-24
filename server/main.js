@@ -10,7 +10,16 @@ const room = new Room({
     height: 3 * 4,
   },
   displays: 4,
+  storage: path.join(__dirname, '..', 'data'),
 });
+
+const shutdown = () => {
+  room.persist();
+  process.exit(0);
+};
+process
+  .on('SIGTERM', shutdown)
+  .on('SIGINT', shutdown);
 
 const server = express();
 server.use(helmet({ frameguard: false }));

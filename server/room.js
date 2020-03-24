@@ -1,17 +1,53 @@
+const fs = require('fs');
+const path = require('path');
 const { v4: uuid } = require('uuid');
 
 class Room {
   constructor({
     dimensions,
     displays,
+    storage,
   }) {
     this.clients = [];
     this.dimensions = dimensions;
-    this.displays = [...Array(displays)].map(() => (
-      new Uint8Array([...Array(dimensions.width * dimensions.height)].map(() => (
-        Math.random() > 0.5 ? 1 : 0
-      )))
+    this.storage = storage;
+    this.load(displays);
+  }
+
+  load(displays) {
+    const { dimensions, storage } = this;
+    const displaySize = dimensions.width * dimensions.height;
+    const fileSize = displaySize * displays;
+    let stored;
+    try {
+      stored = fs.readFileSync(path.join(storage, 'room.bin'));
+      if (stored.length !== fileSize) {
+        stored = undefined;
+      }
+    } catch (e) {}
+    this.displays = [...Array(displays)].map((v, display) => (
+      stored ? (
+        Buffer.from(stored.buffer, stored.byteOffset + (displaySize * display), displaySize)
+      ) : (
+        Buffer.from([...Array(displaySize)].map(() => (
+          Math.random() > 0.5 ? 1 : 0
+        )))
+      )
     ));
+  }
+
+  persist() {
+    const { dimensions, displays, storage } = this;
+    const displaySize = dimensions.width * dimensions.height;
+    const buffer = Buffer.concat(displays, displaySize * displays.length);
+    try {
+      if (!fs.existsSync(storage)) {
+        fs.mkdirSync(storage);
+      }
+      fs.writeFileSync(path.join(storage, 'room.bin'), buffer);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   onClose(client) {
@@ -39,7 +75,7 @@ class Room {
       type: 'LOAD',
       data: {
         displays: displays.map((display) => (
-          Buffer.from(display.buffer).toString('base64')
+          display.toString('base64')
         )),
         peers: clients.map(({ id }) => (id)),
       },
