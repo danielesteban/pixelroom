@@ -24,4 +24,4 @@ RUN mkdir data && chown node:node data
 USER node
 
 # Start server
-CMD [ "forever", "server/main.js" ]
+CMD [ "forever", "--killSignal=SIGTERM", "server/main.js" ]
