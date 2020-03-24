@@ -28,37 +28,33 @@ class Player extends Object3D {
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = xr.getController(i);
       this.add(controller);
+      const buttons = {};
+      controller.getButtons = () => {
+        const frame = { ...buttons };
+        Object.keys(buttons).forEach((id) => {
+          if (~id.indexOf('Down') || ~id.indexOf('Up')) {
+            buttons[id] = false;
+          }
+        });
+        return frame;
+      };
+      controller.buttons = buttons;
       controller.marker = new Marker();
       controller.raycaster = new Raycaster();
       controller.raycaster.ray.quaternion = new Quaternion();
       controller.raycaster.far = 16;
-      const onSelectStart = () => {
-        controller.trigger = true;
-        controller.triggerDown = true;
-        const { hand } = controller;
-        hand.setFinger('index', true);
-        hand.setFinger('middle', true);
-      };
-      const onSelectEnd = () => {
-        controller.trigger = false;
-        controller.triggerUp = true;
-        const { hand } = controller;
-        hand.setFinger('index', false);
-        hand.setFinger('middle', false);
-      };
-      controller.addEventListener('connected', ({ data: { handedness } }) => {
+      controller.addEventListener('connected', ({ data: { handedness, gamepad } }) => {
         const hand = new Hand({ handedness });
         controller.hand = hand;
+        controller.gamepad = gamepad;
         controller.add(hand);
-        controller.addEventListener('selectstart', onSelectStart);
-        controller.addEventListener('selectend', onSelectEnd);
+        console.log(gamepad);
       });
       controller.addEventListener('disconnected', () => {
         controller.remove(controller.hand);
         delete controller.hand;
+        delete controller.gamepad;
         controller.marker.visible = false;
-        controller.removeEventListener('selectstart', onSelectStart);
-        controller.removeEventListener('selectend', onSelectEnd);
       });
       return controller;
     });
@@ -77,7 +73,9 @@ class Player extends Object3D {
     } = this;
     camera.matrixWorld.decompose(head.position, head.rotation, auxVector);
     controllers.forEach(({
+      buttons,
       hand,
+      gamepad,
       marker,
       matrixWorld,
       raycaster,
@@ -85,6 +83,25 @@ class Player extends Object3D {
       if (!hand) {
         return;
       }
+      [
+        ['forwards', gamepad.axes[3] <= -0.5],
+        ['backwards', gamepad.axes[3] >= 0.5],
+        ['leftwards', gamepad.axes[2] <= -0.5],
+        ['rightwards', gamepad.axes[2] >= 0.5],
+        ['trigger', gamepad.buttons[0] && gamepad.buttons[0].pressed],
+        ['grip', gamepad.buttons[1] && gamepad.buttons[1].pressed],
+        ['primary', gamepad.buttons[4] && gamepad.buttons[4].pressed],
+        ['secondary', gamepad.buttons[5] && gamepad.buttons[5].pressed],
+      ].forEach(([axis, value]) => {
+        buttons[`${axis}Down`] = value && buttons[axis] !== value;
+        buttons[`${axis}Up`] = !value && buttons[axis] !== value;
+        buttons[axis] = value;
+      });
+      hand.setFingers({
+        thumb: !!gamepad.buttons[3].touched,
+        index: !!gamepad.buttons[0].touched,
+        middle: !!gamepad.buttons[1].touched,
+      });
       hand.animate({ delta });
       marker.visible = false;
       auxMatrix.identity().extractRotation(matrixWorld);

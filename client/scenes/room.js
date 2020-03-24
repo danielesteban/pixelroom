@@ -79,8 +79,6 @@ class Room extends Scene {
         lastPixel,
         marker,
         raycaster,
-        trigger,
-        triggerUp,
       } = controller;
       if (!hand) {
         return;
@@ -117,24 +115,41 @@ class Room extends Scene {
       } else if (controller.lastPixel) {
         delete controller.lastPixel;
       }
+      const {
+        trigger,
+        triggerUp,
+        grip,
+        gripUp,
+        leftwardsDown,
+        rightwardsDown,
+      } = controller.getButtons();
       if (
         !player.destination
-        && (trigger || triggerUp)
+        && (
+          trigger || triggerUp
+          || grip || gripUp
+        )
       ) {
         const { hit, points } = CurveCast({
           intersects,
           raycaster,
         });
         if (hit) {
-          if (triggerUp) {
+          if (triggerUp || gripUp) {
             player.translocate(hit.point);
           } else {
             marker.update({ hit, points });
           }
         }
       }
-      controller.triggerDown = false;
-      controller.triggerUp = false;
+      if (
+        !player.destination
+        && (leftwardsDown || rightwardsDown)
+      ) {
+        player.rotateY(
+          Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
+        );
+      }
     });
   }
 
