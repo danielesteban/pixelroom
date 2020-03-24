@@ -13,9 +13,6 @@ RUN npm install
 COPY server/ server/
 COPY client/ client/
 
-# Create data volume
-RUN mkdir data && chown node:node data
-
 # De-escalate privileges
 USER node
 
