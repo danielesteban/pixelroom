@@ -16,7 +16,7 @@ class Player extends Object3D {
     this.auxMatrix = new Matrix4();
     this.auxVector = new Vector3();
     this.auxDestination = new Vector3();
-    this.direction = new Vector3()
+    this.direction = new Vector3();
     this.head = {
       position: new Vector3(),
       rotation: new Quaternion(),
@@ -116,7 +116,7 @@ class Player extends Object3D {
       raycaster.ray.origin
         .setFromMatrixPosition(matrixWorld)
         .add(
-          auxVector.set(0, -0.1 / 3, 0).applyMatrix4(auxMatrix),
+          auxVector.set(0, -0.1 / 3, 0).applyMatrix4(auxMatrix)
         );
       raycaster.ray.direction.set(0, 0, -1).applyMatrix4(auxMatrix);
       raycaster.ray.quaternion.setFromRotationMatrix(auxMatrix);

@@ -24,16 +24,19 @@ class Room {
       if (stored.length !== fileSize) {
         stored = undefined;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Fail silently
+    }
     this.displays = [...Array(displays)].map((v, display) => (
       stored ? (
         Buffer.from(stored.buffer, stored.byteOffset + (displaySize * display), displaySize)
       ) : (
-        Buffer.from([...Array(displaySize)].map(() => (
-          Math.random() > 0.5 ? (
-            Math.random() > 0.25 ? 0xFF : Math.floor(Math.random() * 0xFF)
-          ) : 0
-        )))
+        Buffer.from([...Array(displaySize)].map(() => {
+          if (Math.random() > 0.5) {
+            return Math.random() > 0.25 ? 0xFF : Math.floor(Math.random() * 0xFF);
+          }
+          return 0;
+        }))
       )
     ));
   }
@@ -137,16 +140,16 @@ class Room {
         };
         color = parseInt(color, 10);
         if (!(
-          isNaN(display)
+          Number.isNaN(display)
           || display < 0
           || display >= displays.length
-          || isNaN(pixel.x)
+          || Number.isNaN(pixel.x)
           || pixel.x < 0
           || pixel.x >= dimensions.width
-          || isNaN(pixel.y)
+          || Number.isNaN(pixel.y)
           || pixel.y < 0
           || pixel.y >= dimensions.height
-          || isNaN(color)
+          || Number.isNaN(color)
           || color < 0
           || color > 255
         )) {

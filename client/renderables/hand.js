@@ -83,10 +83,15 @@ class Hand extends SkinnedMesh {
 
   static setupGeometry() {
     const geometry = new Geometry();
-    const pushBox = (
-      { w, h, d, x, y, z },
-      bone
-    ) => {
+    const pushBox = (dimensions, bone) => {
+      const {
+        w,
+        h,
+        d,
+        x,
+        y,
+        z,
+      } = dimensions;
       const box = new BoxGeometry(w, h, d, w * 100, h * 100, d * 100);
       box.translate(x, y, z);
       box.faces.forEach((face, i) => {
@@ -244,12 +249,20 @@ Hand.animationSpeed = 4;
 
 Hand.dimensions = {
   base: {
-    w: 0.08, h: 0.08, d: 0.015,
-    x: 0, y: 0, z: 0,
+    w: 0.08,
+    h: 0.08,
+    d: 0.015,
+    x: 0,
+    y: 0,
+    z: 0,
   },
   phalange: {
-    w: 0.02, h: 0.02, d: 0.02,
-    x: 0, y: 0.01, z: 0,
+    w: 0.02,
+    h: 0.02,
+    d: 0.02,
+    x: 0,
+    y: 0.01,
+    z: 0,
   },
 };
 

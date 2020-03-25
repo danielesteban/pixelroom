@@ -10,10 +10,10 @@ import Display from '../renderables/display.js';
 import Wall from '../renderables/wall.js';
 
 class Room extends Scene {
-  constructor({ renderer: { camera, listener, renderer: { xr } } }) {
+  constructor({ renderer: { camera, renderer: { xr } } }) {
     super();
     const { width, length, height } = Room.dimensions;
-    
+
     this.auxVector = new Vector3();
 
     this.player = new Player({ camera, xr });
@@ -29,7 +29,7 @@ class Room extends Scene {
 
     this.peers = new Peers();
     this.add(this.peers);
-    
+
     const floor = new Wall({ width, height: length, light: 0.6 });
     floor.rotation.set(Math.PI * -0.5, 0, 0);
     this.add(floor);
@@ -39,7 +39,7 @@ class Room extends Scene {
     this.add(ceiling);
 
     this.intersects = [
-      new Translocable({ width, length, offset: 0.25 })
+      new Translocable({ width, length, offset: 0.25 }),
     ];
     this.intersects.forEach((mesh) => this.add(mesh));
 
@@ -58,10 +58,10 @@ class Room extends Scene {
         this.add(wall);
         return display;
       });
-  
+
     this.connect();
   }
- 
+
   onBeforeRender({ animation: { delta, time } }, scene, camera) {
     const {
       auxVector,

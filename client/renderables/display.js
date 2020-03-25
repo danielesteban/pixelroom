@@ -29,7 +29,7 @@ class Display extends InstancedMesh {
     Display.intersectGeometry = new BoxBufferGeometry(1, 1, 1, 1, 1, 1);
     [
       Display.geometry,
-      Display.intersectGeometry
+      Display.intersectGeometry,
     ].forEach((geometry) => {
       delete geometry.attributes.normal;
       delete geometry.attributes.uv;
@@ -84,7 +84,7 @@ class Display extends InstancedMesh {
           [
             'attribute float instanceColor;',
             'varying float vInstanceColor;',
-            '#include <common>'
+            '#include <common>',
           ].join('\n')
         )
         .replace(
@@ -180,9 +180,10 @@ class Display extends InstancedMesh {
     const { geometry, pixels } = this;
     const instances = geometry.getAttribute('instanceColor');
     const index = (y * pixels.x) + x;
-    const color = !instances.array[index] ? (
-      Math.random() > 0.5 ? 0xFF : Math.floor(Math.random() * 0xFF)
-    ) : 0;
+    let color = 0;
+    if (!instances.array[index]) {
+      color = Math.random() > 0.5 ? 0xFF : Math.floor(Math.random() * 0xFF);
+    }
     instances.array[index] = color;
     instances.needsUpdate = true;
     return color;

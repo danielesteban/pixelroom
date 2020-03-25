@@ -45,7 +45,7 @@ class Peers extends Object3D {
           hands.push(
             ...ray.origin.toArray(),
             ...ray.quaternion.toArray(),
-            state,
+            state
           );
           return hands;
         }, [])

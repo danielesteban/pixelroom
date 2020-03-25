@@ -1,5 +1,4 @@
 import {
-  Color,
   Mesh,
   MeshBasicMaterial,
   PlaneBufferGeometry,

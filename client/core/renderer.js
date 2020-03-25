@@ -1,7 +1,6 @@
 import {
   Clock,
   PerspectiveCamera,
-  ShaderChunk,
   sRGBEncoding,
   WebGLRenderer,
 } from './three.js';
@@ -49,7 +48,7 @@ class Renderer {
       mount.addEventListener('mousedown', () => {
         if (xr.isPresenting) return;
         navigator.xr.requestSession('immersive-vr', {
-          optionalFeatures: ['local-floor', 'bounded-floor']
+          optionalFeatures: ['local-floor', 'bounded-floor'],
         })
           .then((session) => {
             xr.setSession(session);
