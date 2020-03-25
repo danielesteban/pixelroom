@@ -135,31 +135,23 @@ class Room {
         let { display, pixel, state } = request.data;
         display = parseInt(display, 10);
         pixel = {
-          x: parseInt(pixel ? pixel.x : 0, 10),
-          y: parseInt(pixel ? pixel.y : 0, 10),
+          x: parseInt((pixel || {}).x, 10),
+          y: parseInt((pixel || {}).y, 10),
         };
         state = parseInt(state, 10);
         if (!(
-          (
-            isNaN(display)
-            || display < 0
-            || display >= displays.length
-          )
-          || (
-            isNaN(pixel.x)
-            || pixel.x < 0
-            || pixel.x >= dimensions.width
-          )
-          || (
-            isNaN(pixel.y)
-            || pixel.y < 0
-            || pixel.y >= dimensions.height
-          )
-          || (
-            isNaN(state)
-            || state < 0
-            || state > 1
-          )
+          isNaN(display)
+          || display < 0
+          || display >= displays.length
+          || isNaN(pixel.x)
+          || pixel.x < 0
+          || pixel.x >= dimensions.width
+          || isNaN(pixel.y)
+          || pixel.y < 0
+          || pixel.y >= dimensions.height
+          || isNaN(state)
+          || state < 0
+          || state > 1
         )) {
           this.update({
             client: client.id,
