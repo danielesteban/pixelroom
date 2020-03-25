@@ -1,34 +1,21 @@
-import {
-  Scene,
-  Vector3,
-} from '../core/three.js';
-import CurveCast from '../core/curvecast.js';
-import Peers from '../core/peers.js';
-import Player from '../core/player.js';
+import { Vector3 } from '../core/three.js';
+import Scene from '../core/scene.js';
 import Translocable from '../core/translocable.js';
 import Display from '../renderables/display.js';
 import Wall from '../renderables/wall.js';
 
 class Room extends Scene {
-  constructor({ renderer: { camera, renderer: { xr } } }) {
-    super();
+  constructor(renderer) {
+    super(renderer);
     const { width, length, height } = Room.dimensions;
 
-    this.auxVector = new Vector3();
-
-    this.player = new Player({ camera, xr });
-    this.player.controllers.forEach(({ marker }) => (
-      this.add(marker)
-    ));
     this.player.position.set(
       Math.floor(Math.random() * 4) - 2,
       0,
       Math.floor(Math.random() * 4) - 2
     );
-    this.add(this.player);
 
-    this.peers = new Peers();
-    this.add(this.peers);
+    this.auxVector = new Vector3();
 
     const floor = new Wall({ width, height: length, light: 0.6 });
     floor.rotation.set(Math.PI * -0.5, 0, 0);
@@ -38,10 +25,9 @@ class Room extends Scene {
     ceiling.rotation.set(Math.PI * 0.5, 0, 0);
     this.add(ceiling);
 
-    this.intersects = [
-      new Translocable({ width, length, offset: 0.25 }),
-    ];
-    this.intersects.forEach((mesh) => this.add(mesh));
+    const translocable = new Translocable({ width, length, offset: 0.25 });
+    this.translocables.push(translocable);
+    this.add(translocable);
 
     this.displays = [
       [width, 0, length * -0.5],
@@ -58,26 +44,20 @@ class Room extends Scene {
         this.add(wall);
         return display;
       });
-
-    this.connect();
   }
 
-  onBeforeRender({ animation: { delta, time } }, scene, camera) {
+  onBeforeRender(renderer, scene, camera) {
+    super.onBeforeRender(renderer, scene, camera);
+    Display.animateMaterial(renderer.animation.time);
     const {
       displays,
-      intersects,
-      peers,
       player,
       server,
     } = this;
-    Display.animateMaterial(time);
-    player.onAnimationTick({ delta, camera });
-    peers.onAnimationTick({ delta, player });
     player.controllers.forEach((controller) => {
       const {
         hand,
         lastPixel,
-        marker,
         raycaster,
       } = controller;
       if (!hand) {
@@ -106,90 +86,27 @@ class Room extends Scene {
       } else if (controller.lastPixel) {
         delete controller.lastPixel;
       }
-      const {
-        forwards,
-        forwardsUp,
-        leftwardsDown,
-        rightwardsDown,
-      } = controller.getButtons();
-      if (
-        !player.destination
-        && hand.handedness === 'left'
-        && (leftwardsDown || rightwardsDown)
-      ) {
-        player.rotate(
-          Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
-        );
-      }
-      if (
-        !player.destination
-        && hand.handedness === 'right'
-        && (forwards || forwardsUp)
-      ) {
-        const { hit, points } = CurveCast({
-          intersects,
-          raycaster,
-        });
-        if (hit) {
-          if (forwardsUp) {
-            player.translocate(hit.point);
-          } else {
-            marker.update({ hit, points });
-          }
-        }
-      }
     });
   }
 
-  onEvent({ data }) {
-    let event;
-    try {
-      event = JSON.parse(data);
-    } catch (e) {
-      return;
-    }
-    const { displays, peers, server } = this;
-    switch (event.type) {
+  onEvent(event) {
+    super.onEvent(event);
+    const { displays } = this;
+    const { type, data } = event;
+    switch (type) {
       case 'LOAD':
-        event.data.displays.forEach((state, display) => (
+        data.displays.forEach((state, display) => (
           displays[display].load(state)
         ));
-        peers.init({
-          server,
-          peers: event.data.peers,
-        });
         break;
       case 'UPDATE': {
-        const { display, pixel, color } = event.data;
+        const { display, pixel, color } = data;
         displays[display].updatePixel(pixel.x, pixel.y, color);
         break;
       }
-      case 'JOIN':
-        peers.join(event.data);
-        break;
-      case 'LEAVE':
-        peers.leave(event.data);
-        break;
-      case 'SIGNAL':
-        peers.signal(event.data);
-        break;
       default:
         break;
     }
-  }
-
-  connect() {
-    const { peers } = this;
-    const url = new URL(window.location);
-    url.protocol = url.protocol.replace(/http/, 'ws');
-    url.hash = '';
-    this.server = new WebSocket(url.toString());
-    this.server.addEventListener('close', () => {
-      peers.reset();
-      setTimeout(() => this.connect(), 1000);
-    });
-    this.server.addEventListener('error', () => {});
-    this.server.addEventListener('message', this.onEvent.bind(this));
   }
 
   getPixelAtPosition(position) {

@@ -39,18 +39,10 @@ class Player extends Object3D {
         primary: false,
         secondary: false,
       };
-      controller.getButtons = () => {
-        const frame = { ...buttons };
-        Object.keys(buttons).forEach((id) => {
-          if (~id.indexOf('Down') || ~id.indexOf('Up')) {
-            buttons[id] = false;
-          }
-        });
-        return frame;
-      };
       controller.buttons = buttons;
       controller.marker = new Marker();
       controller.raycaster = new Raycaster();
+      controller.raycaster.far = 16;
       controller.worldspace = {
         position: new Vector3(),
         rotation: new Quaternion(),
@@ -104,10 +96,10 @@ class Player extends Object3D {
         ['grip', gamepad.buttons[1] && gamepad.buttons[1].pressed],
         ['primary', gamepad.buttons[4] && gamepad.buttons[4].pressed],
         ['secondary', gamepad.buttons[5] && gamepad.buttons[5].pressed],
-      ].forEach(([axis, value]) => {
-        buttons[`${axis}Down`] = value && buttons[axis] !== value;
-        buttons[`${axis}Up`] = !value && buttons[axis] !== value;
-        buttons[axis] = value;
+      ].forEach(([key, value]) => {
+        buttons[`${key}Down`] = value && buttons[key] !== value;
+        buttons[`${key}Up`] = !value && buttons[key] !== value;
+        buttons[key] = value;
       });
       hand.setFingers({
         thumb: gamepad.buttons[3] && gamepad.buttons[3].touched,
@@ -118,7 +110,6 @@ class Player extends Object3D {
       marker.visible = false;
       matrixWorld.decompose(worldspace.position, worldspace.rotation, vector);
       rotation.identity().extractRotation(matrixWorld);
-      raycaster.far = 16;
       raycaster.ray.origin
         .addVectors(
           worldspace.position,

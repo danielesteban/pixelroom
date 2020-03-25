@@ -123,7 +123,7 @@ class Renderer {
       this.scene.dispose();
       delete this.scene;
     }
-    this.scene = new Scene({ renderer: this });
+    this.scene = new Scene(this);
   }
 }
 
