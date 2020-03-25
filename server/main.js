@@ -1,5 +1,6 @@
 const express = require('express');
 const expressWS = require('express-ws');
+const compression = require('compression');
 const helmet = require('helmet');
 const path = require('path');
 const Room = require('./room');
@@ -22,8 +23,10 @@ process
   .on('SIGINT', shutdown);
 
 const server = express();
-server.use(helmet({ frameguard: false }));
+server.use(compression());
+server.use(helmet());
 server.use(express.static(path.join(__dirname, '..', 'client')));
-expressWS(server, undefined, { perMessageDeflate: true });
+expressWS(server, null, { clientTracking: false, perMessageDeflate: true });
 server.ws('/', room.onClient.bind(room));
-server.listen(process.env.PORT || 8080);
+server.use((req, res) => res.status(404).end());
+server.listen(process.env.PORT || 80);
