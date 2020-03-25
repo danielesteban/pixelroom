@@ -51,7 +51,6 @@ class Player extends Object3D {
       controller.buttons = buttons;
       controller.marker = new Marker();
       controller.raycaster = new Raycaster();
-      controller.raycaster.far = 16;
       controller.worldspace = {
         position: new Vector3(),
         rotation: new Quaternion(),
@@ -74,7 +73,7 @@ class Player extends Object3D {
 
   onAnimationTick({ delta, camera }) {
     const {
-      auxMatrixA: matrix,
+      auxMatrixA: rotation,
       auxVector: vector,
       controllers,
       destination,
@@ -118,13 +117,14 @@ class Player extends Object3D {
       hand.animate({ delta });
       marker.visible = false;
       matrixWorld.decompose(worldspace.position, worldspace.rotation, vector);
-      matrix.identity().extractRotation(matrixWorld);
+      rotation.identity().extractRotation(matrixWorld);
+      raycaster.far = 16;
       raycaster.ray.origin
         .addVectors(
           worldspace.position,
-          vector.set(0, -0.1 / 3, 0).applyMatrix4(matrix)
+          vector.set(0, -0.1 / 3, 0).applyMatrix4(rotation)
         );
-      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(matrix);
+      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(rotation);
     });
     if (!destination) {
       return;
