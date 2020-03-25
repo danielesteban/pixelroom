@@ -29,7 +29,7 @@ class Player extends Object3D {
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = xr.getController(i);
       this.add(controller);
-      const buttons = {
+      controller.buttons = {
         forwards: false,
         backwards: false,
         leftwards: false,
@@ -39,7 +39,6 @@ class Player extends Object3D {
         primary: false,
         secondary: false,
       };
-      controller.buttons = buttons;
       controller.marker = new Marker();
       controller.raycaster = new Raycaster();
       controller.raycaster.far = 16;
