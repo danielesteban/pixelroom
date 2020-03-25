@@ -6,11 +6,6 @@
   "plugins": [
     "import"
   ],
-  "settings": {
-    "import/resolver": {
-      "node": true
-    }
-  },
   "rules": {
     "comma-dangle": ["error", {
       "arrays": "always-multiline",
