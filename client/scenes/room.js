@@ -117,15 +117,16 @@ class Room extends Scene {
         delete controller.lastPixel;
       }
       const {
-        forward,
-        forwardUp,
+        forwards,
+        forwardsUp,
         leftwardsDown,
         rightwardsDown,
+        triggerDown,
       } = controller.getButtons();
       if (
         !player.destination
         && hand.handedness === 'left'
-        && (leftwardsDown || rightwardsDown)
+        && (leftwardsDown || rightwardsDown || triggerDown)
       ) {
         player.rotate(
           Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
@@ -134,14 +135,14 @@ class Room extends Scene {
       if (
         !player.destination
         && hand.handedness === 'right'
-        && (forward || forwardUp)
+        && (forwards || forwardsUp)
       ) {
         const { hit, points } = CurveCast({
           intersects,
           raycaster,
         });
         if (hit) {
-          if (forwardUp) {
+          if (forwardsUp) {
             player.translocate(hit.point);
           } else {
             marker.update({ hit, points });

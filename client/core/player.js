@@ -142,15 +142,19 @@ class Player extends Object3D {
       head,
       position,
     } = this;
+    const origin = {
+      x: head.position.x - position.x,
+      z: head.position.z - position.z,
+    };
     transform.makeTranslation(
-      head.position.x, position.y, head.position.z
+      origin.x, position.y, origin.z
     );
     transform.multiply(
       matrix.makeRotationY(radians)
     );
     transform.multiply(
       matrix.makeTranslation(
-        -head.position.x, -position.y, -head.position.z
+        -origin.x, -position.y, -origin.z
       )
     );
     this.applyMatrix4(transform);
