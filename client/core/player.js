@@ -51,8 +51,11 @@ class Player extends Object3D {
       controller.buttons = buttons;
       controller.marker = new Marker();
       controller.raycaster = new Raycaster();
-      controller.raycaster.ray.quaternion = new Quaternion();
       controller.raycaster.far = 16;
+      controller.worldspace = {
+        position: new Vector3(),
+        rotation: new Quaternion(),
+      };
       controller.addEventListener('connected', ({ data: { handedness, gamepad } }) => {
         const hand = new Hand({ handedness });
         controller.hand = hand;
@@ -88,6 +91,7 @@ class Player extends Object3D {
       marker,
       matrixWorld,
       raycaster,
+      worldspace,
     }) => {
       if (!hand) {
         return;
@@ -113,14 +117,14 @@ class Player extends Object3D {
       });
       hand.animate({ delta });
       marker.visible = false;
+      matrixWorld.decompose(worldspace.position, worldspace.rotation, vector);
       matrix.identity().extractRotation(matrixWorld);
       raycaster.ray.origin
-        .setFromMatrixPosition(matrixWorld)
-        .add(
+        .addVectors(
+          worldspace.position,
           vector.set(0, -0.1 / 3, 0).applyMatrix4(matrix)
         );
       raycaster.ray.direction.set(0, 0, -1).applyMatrix4(matrix);
-      raycaster.ray.quaternion.setFromRotationMatrix(matrix);
     });
     if (!destination) {
       return;

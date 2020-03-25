@@ -41,10 +41,10 @@ class Peers extends Object3D {
       ...head.position.toArray(),
       ...head.rotation.toArray(),
       ...(hands.length === 2 ? (
-        hands.reduce((hands, { hand: { state }, raycaster: { ray } }) => {
+        hands.reduce((hands, { hand: { state }, worldspace: { position, rotation } }) => {
           hands.push(
-            ...ray.origin.toArray(),
-            ...ray.quaternion.toArray(),
+            ...position.toArray(),
+            ...rotation.toArray(),
             state
           );
           return hands;

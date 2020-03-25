@@ -44,7 +44,7 @@ class Peer extends Object3D {
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = new Object3D();
       controller.visible = false;
-      controller.hand = new Hand({ mirrored: i === 0 });
+      controller.hand = new Hand({ handedness: i === 0 ? 'right' : 'left' });
       controller.add(controller.hand);
       this.add(controller);
       return controller;
