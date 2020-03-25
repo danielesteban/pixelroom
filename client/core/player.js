@@ -108,8 +108,8 @@ class Player extends Object3D {
       });
       hand.setFingers({
         thumb: gamepad.buttons[3] && gamepad.buttons[3].touched,
-        index: gamepad.buttons[0] && gamepad.buttons[0].touched,
-        middle: gamepad.buttons[1] && gamepad.buttons[1].touched,
+        index: gamepad.buttons[0] && gamepad.buttons[0].pressed,
+        middle: gamepad.buttons[1] && gamepad.buttons[1].pressed,
       });
       hand.animate({ delta });
       marker.visible = false;
