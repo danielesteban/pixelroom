@@ -57,7 +57,6 @@ class Player extends Object3D {
         controller.hand = hand;
         controller.gamepad = gamepad;
         controller.add(hand);
-        console.log(gamepad);
       });
       controller.addEventListener('disconnected', () => {
         controller.remove(controller.hand);
