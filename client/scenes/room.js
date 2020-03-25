@@ -9,14 +9,6 @@ class Room extends Scene {
     super(renderer);
     const { width, length, height } = Room.dimensions;
 
-    this.player.position.set(
-      Math.floor(Math.random() * 4) - 2,
-      0,
-      Math.floor(Math.random() * 4) - 2
-    );
-
-    this.auxVector = new Vector3();
-
     const floor = new Wall({ width, height: length, light: 0.6 });
     floor.rotation.set(Math.PI * -0.5, 0, 0);
     this.add(floor);
@@ -28,6 +20,14 @@ class Room extends Scene {
     const translocable = new Translocable({ width, length, offset: 0.25 });
     this.translocables.push(translocable);
     this.add(translocable);
+
+    this.player.position.set(
+      Math.floor(Math.random() * 4) - 2,
+      0,
+      Math.floor(Math.random() * 4) - 2
+    );
+
+    this.auxVector = new Vector3();
 
     this.displays = [
       [width, 0, length * -0.5],
