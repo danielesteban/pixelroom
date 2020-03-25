@@ -117,39 +117,36 @@ class Room extends Scene {
         delete controller.lastPixel;
       }
       const {
-        trigger,
-        triggerUp,
-        grip,
-        gripUp,
+        forward,
+        forwardUp,
         leftwardsDown,
         rightwardsDown,
       } = controller.getButtons();
       if (
         !player.destination
-        && (
-          trigger || triggerUp
-          || grip || gripUp
-        )
+        && hand.handedness === 'left'
+        && (leftwardsDown || rightwardsDown)
+      ) {
+        player.rotate(
+          Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
+        );
+      }
+      if (
+        !player.destination
+        && hand.handedness === 'right'
+        && (forward || forwardUp)
       ) {
         const { hit, points } = CurveCast({
           intersects,
           raycaster,
         });
         if (hit) {
-          if (triggerUp || gripUp) {
+          if (forwardUp) {
             player.translocate(hit.point);
           } else {
             marker.update({ hit, points });
           }
         }
-      }
-      if (
-        !player.destination
-        && (leftwardsDown || rightwardsDown)
-      ) {
-        player.rotateY(
-          Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
-        );
       }
     });
   }

@@ -13,7 +13,8 @@ import Marker from '../renderables/marker.js';
 class Player extends Object3D {
   constructor({ camera, xr }) {
     super();
-    this.auxMatrix = new Matrix4();
+    this.auxMatrixA = new Matrix4();
+    this.auxMatrixB = new Matrix4();
     this.auxVector = new Vector3();
     this.auxDestination = new Vector3();
     this.direction = new Vector3();
@@ -70,8 +71,8 @@ class Player extends Object3D {
 
   onAnimationTick({ delta, camera }) {
     const {
-      auxMatrix,
-      auxVector,
+      auxMatrixA: matrix,
+      auxVector: vector,
       controllers,
       destination,
       direction,
@@ -79,7 +80,7 @@ class Player extends Object3D {
       position,
       speed,
     } = this;
-    camera.matrixWorld.decompose(head.position, head.rotation, auxVector);
+    camera.matrixWorld.decompose(head.position, head.rotation, vector);
     controllers.forEach(({
       buttons,
       hand,
@@ -112,14 +113,14 @@ class Player extends Object3D {
       });
       hand.animate({ delta });
       marker.visible = false;
-      auxMatrix.identity().extractRotation(matrixWorld);
+      matrix.identity().extractRotation(matrixWorld);
       raycaster.ray.origin
         .setFromMatrixPosition(matrixWorld)
         .add(
-          auxVector.set(0, -0.1 / 3, 0).applyMatrix4(auxMatrix)
+          vector.set(0, -0.1 / 3, 0).applyMatrix4(matrix)
         );
-      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(auxMatrix);
-      raycaster.ray.quaternion.setFromRotationMatrix(auxMatrix);
+      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(matrix);
+      raycaster.ray.quaternion.setFromRotationMatrix(matrix);
     });
     if (!destination) {
       return;
@@ -132,6 +133,27 @@ class Player extends Object3D {
       return;
     }
     position.addScaledVector(direction, step);
+  }
+
+  rotate(radians) {
+    const {
+      auxMatrixA: transform,
+      auxMatrixB: matrix,
+      head,
+      position,
+    } = this;
+    transform.makeTranslation(
+      head.position.x, position.y, head.position.z
+    );
+    transform.multiply(
+      matrix.makeRotationY(radians)
+    );
+    transform.multiply(
+      matrix.makeTranslation(
+        -head.position.x, -position.y, -head.position.z
+      )
+    );
+    this.applyMatrix4(transform);
   }
 
   translocate(point) {
