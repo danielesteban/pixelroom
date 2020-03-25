@@ -1,6 +1,6 @@
+const compression = require('compression');
 const express = require('express');
 const expressWS = require('express-ws');
-const compression = require('compression');
 const helmet = require('helmet');
 const path = require('path');
 const Room = require('./room');
