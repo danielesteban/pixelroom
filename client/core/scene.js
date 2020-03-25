@@ -3,6 +3,8 @@ import CurveCast from './curvecast.js';
 import Peers from './peers.js';
 import Player from './player.js';
 
+// A multiplayer VR scene base class
+
 class Scene extends ThreeScene {
   constructor({ camera, renderer: { xr } }) {
     super();
@@ -23,9 +25,9 @@ class Scene extends ThreeScene {
 
   onBeforeRender({ animation: { delta } }, scene, camera) {
     const {
-      translocables,
       peers,
       player,
+      translocables,
     } = this;
     player.onAnimationTick({ delta, camera });
     peers.onAnimationTick({ delta, player });
