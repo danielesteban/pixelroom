@@ -121,12 +121,11 @@ class Room extends Scene {
         forwardsUp,
         leftwardsDown,
         rightwardsDown,
-        triggerDown,
       } = controller.getButtons();
       if (
         !player.destination
         && hand.handedness === 'left'
-        && (leftwardsDown || rightwardsDown || triggerDown)
+        && (leftwardsDown || rightwardsDown)
       ) {
         player.rotate(
           Math.PI * 0.25 * (leftwardsDown ? 1 : -1)
