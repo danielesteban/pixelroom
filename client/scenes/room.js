@@ -62,7 +62,7 @@ class Room extends Scene {
     this.connect();
   }
  
-  onBeforeRender({ animation: { delta } }, scene, camera) {
+  onBeforeRender({ animation: { delta, time } }, scene, camera) {
     const {
       auxVector,
       displays,
@@ -71,6 +71,7 @@ class Room extends Scene {
       player,
       server,
     } = this;
+    Display.animateMaterial(time);
     player.onAnimationTick({ delta, camera });
     peers.onAnimationTick({ delta, player });
     player.controllers.forEach((controller) => {

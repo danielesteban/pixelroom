@@ -7,6 +7,9 @@ import {
   Mesh,
   MeshBasicMaterial,
   Object3D,
+  ShaderLib,
+  ShaderMaterial,
+  UniformsUtils,
   VertexColors,
 } from '../core/three.js';
 
@@ -34,31 +37,15 @@ class Display extends InstancedMesh {
   }
 
   static setupMaterial() {
-    const material = new MeshBasicMaterial({
+    const material = new ShaderMaterial({
+      name: 'display-material',
       vertexColors: VertexColors,
-    });
-    material.onBeforeCompile = (shader) => {
-      shader.vertexShader = shader.vertexShader
-        .replace(
-          '#include <common>',
-          [
-            'attribute float instanceColor;',
-            'varying float vInstanceColor;',
-            '#include <common>'
-          ].join('\n')
-        )
-        .replace(
-          '#include <begin_vertex>',
-          [
-            '#include <begin_vertex>',
-            'vInstanceColor = instanceColor;',
-          ].join('\n')
-        );
-      shader.fragmentShader = shader.fragmentShader
+      fragmentShader: ShaderLib.basic.fragmentShader
         .replace(
           '#include <common>',
           [
             'varying float vInstanceColor;',
+            'uniform float time;',
             'const float ColorWheelStep = 1.0 / 3.0;',
             'vec3 ColorWheel( float pos ) {',
             '  vec3 color;',
@@ -67,7 +54,7 @@ class Display extends InstancedMesh {
             '  } else if (pos >= 254.5) {',
             '    color = vec3( 1.0, 1.0, 1.0 );',
             '  } else {',
-            '    pos /= 255.0;',
+            '    pos = mod(pos + time * 10.0, 255.0) / 255.0;',
             '    if ( pos < ColorWheelStep ) {',
             '      color = vec3( pos * 3.0, 1.0 - pos * 3.0, 0.0 );',
             '    } else if( pos < ColorWheelStep * 2.0 ) {',
@@ -90,12 +77,36 @@ class Display extends InstancedMesh {
         .replace(
           'vec4 diffuseColor = vec4( diffuse, opacity );',
           'vec4 diffuseColor = vec4( diffuse * ColorWheel(vInstanceColor), opacity );'
-        );
-    };
+        ),
+      vertexShader: ShaderLib.basic.vertexShader
+        .replace(
+          '#include <common>',
+          [
+            'attribute float instanceColor;',
+            'varying float vInstanceColor;',
+            '#include <common>'
+          ].join('\n')
+        )
+        .replace(
+          '#include <begin_vertex>',
+          [
+            '#include <begin_vertex>',
+            'vInstanceColor = instanceColor;',
+          ].join('\n')
+        ),
+      uniforms: {
+        ...UniformsUtils.clone(ShaderLib.basic.uniforms),
+        time: { value: 0 },
+      },
+    });
     Display.material = material;
     Display.intersectMaterial = new MeshBasicMaterial({
       visible: false,
     });
+  }
+
+  static animateMaterial(time) {
+    Display.material.uniforms.time.value = time;
   }
 
   constructor({ width, height }) {
