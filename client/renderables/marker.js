@@ -40,7 +40,7 @@ class Marker extends Object3D {
 
   static setupLineMaterial() {
     Marker.lineMaterial = new LineBasicMaterial({
-      color: 0xffe0bd,
+      color: (new Color(0xffe0bd)).convertGammaToLinear(2.2),
     });
   }
 
