@@ -64,7 +64,6 @@ class Room extends Scene {
 
   onBeforeRender({ animation: { delta, time } }, scene, camera) {
     const {
-      auxVector,
       displays,
       intersects,
       peers,
@@ -84,34 +83,25 @@ class Room extends Scene {
       if (!hand) {
         return;
       }
-      const display = displays.findIndex((display) => (
-        display.intersect.worldToLocal(auxVector.copy(raycaster.ray.origin)).z <= 1
-      ));
-      if (~display) {
-        let { x, y } = auxVector;
-        x += 0.5;
-        y += 0.5;
-        if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
-          const { pixels } = displays[display];
-          x = Math.floor(x * pixels.x);
-          y = Math.floor(y * pixels.y);
-          if (
-            !lastPixel
-            || lastPixel.display !== display
-            || lastPixel.x !== x
-            || lastPixel.y !== y
-          ) {
-            controller.lastPixel = { display, x, y };
-            const color = displays[display].togglePixel(x, y);
-            server.send(JSON.stringify({
-              type: 'UPDATE',
-              data: {
-                display,
-                pixel: { x, y },
-                color,
-              },
-            }));
-          }
+      const pixel = this.getPixelAtPosition(raycaster.ray.origin);
+      if (pixel) {
+        const { display, x, y } = pixel;
+        if (
+          !lastPixel
+          || lastPixel.display !== display
+          || lastPixel.x !== x
+          || lastPixel.y !== y
+        ) {
+          controller.lastPixel = { display, x, y };
+          const color = displays[display].togglePixel(x, y);
+          server.send(JSON.stringify({
+            type: 'UPDATE',
+            data: {
+              display,
+              pixel: { x, y },
+              color,
+            },
+          }));
         }
       } else if (controller.lastPixel) {
         delete controller.lastPixel;
@@ -200,6 +190,27 @@ class Room extends Scene {
     });
     this.server.addEventListener('error', () => {});
     this.server.addEventListener('message', this.onEvent.bind(this));
+  }
+
+  getPixelAtPosition(position) {
+    const { auxVector, displays } = this;
+    const display = displays.findIndex((display) => (
+      display.intersect.worldToLocal(auxVector.copy(position)).z <= 1
+    ));
+    if (~display) {
+      let { x, y } = auxVector;
+      x += 0.5;
+      y += 0.5;
+      if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+        const { pixels } = displays[display];
+        return {
+          display,
+          x: Math.floor(x * pixels.x),
+          y: Math.floor(y * pixels.y),
+        };
+      }
+    }
+    return false;
   }
 }
 
