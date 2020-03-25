@@ -101,13 +101,13 @@ class Room extends Scene {
             || lastPixel.y !== y
           ) {
             controller.lastPixel = { display, x, y };
-            const state = displays[display].togglePixel(x, y);
+            const color = displays[display].togglePixel(x, y);
             server.send(JSON.stringify({
               type: 'UPDATE',
               data: {
                 display,
                 pixel: { x, y },
-                state,
+                color,
               },
             }));
           }
@@ -172,8 +172,8 @@ class Room extends Scene {
         });
         break;
       case 'UPDATE': {
-        const { display, pixel, state } = event.data;
-        displays[display].updatePixel(pixel.x, pixel.y, state);
+        const { display, pixel, color } = event.data;
+        displays[display].updatePixel(pixel.x, pixel.y, color);
         break;
       }
       case 'JOIN':

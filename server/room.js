@@ -30,7 +30,9 @@ class Room {
         Buffer.from(stored.buffer, stored.byteOffset + (displaySize * display), displaySize)
       ) : (
         Buffer.from([...Array(displaySize)].map(() => (
-          Math.random() > 0.5 ? 1 : 0
+          Math.random() > 0.5 ? (
+            Math.random() > 0.25 ? 0xFF : Math.floor(Math.random() * 0xFF)
+          ) : 0
         )))
       )
     ));
@@ -127,13 +129,13 @@ class Room {
         break;
       }
       case 'UPDATE': {
-        let { display, pixel, state } = request.data;
+        let { display, pixel, color } = request.data;
         display = parseInt(display, 10);
         pixel = {
           x: parseInt((pixel || {}).x, 10),
           y: parseInt((pixel || {}).y, 10),
         };
-        state = parseInt(state, 10);
+        color = parseInt(color, 10);
         if (!(
           isNaN(display)
           || display < 0
@@ -144,15 +146,15 @@ class Room {
           || isNaN(pixel.y)
           || pixel.y < 0
           || pixel.y >= dimensions.height
-          || isNaN(state)
-          || state < 0
-          || state > 1
+          || isNaN(color)
+          || color < 0
+          || color > 255
         )) {
           this.update({
             client: client.id,
             display,
             pixel,
-            state,
+            color,
           });
         }
         break;
@@ -197,16 +199,16 @@ class Room {
     client,
     display,
     pixel,
-    state,
+    color,
   }) {
     const { dimensions, displays } = this;
-    displays[display][(dimensions.width * pixel.y) + pixel.x] = state;
+    displays[display][(dimensions.width * pixel.y) + pixel.x] = color;
     this.broadcast({
       type: 'UPDATE',
       data: {
         display,
         pixel,
-        state,
+        color,
       },
     }, {
       exclude: client,

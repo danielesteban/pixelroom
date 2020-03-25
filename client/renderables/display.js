@@ -42,8 +42,8 @@ class Display extends InstancedMesh {
         .replace(
           '#include <common>',
           [
-            'attribute float instanceIsOn;',
-            'varying float vInstanceIsOn;',
+            'attribute float instanceColor;',
+            'varying float vInstanceColor;',
             '#include <common>'
           ].join('\n')
         )
@@ -51,20 +51,45 @@ class Display extends InstancedMesh {
           '#include <begin_vertex>',
           [
             '#include <begin_vertex>',
-            'vInstanceIsOn = instanceIsOn;',
+            'vInstanceColor = instanceColor;',
           ].join('\n')
         );
       shader.fragmentShader = shader.fragmentShader
         .replace(
           '#include <common>',
           [
-            'varying float vInstanceIsOn;',
+            'varying float vInstanceColor;',
+            'const float ColorWheelStep = 1.0 / 3.0;',
+            'vec3 ColorWheel( float pos ) {',
+            '  vec3 color;',
+            '  if (pos == 0.0) {',
+            '    color = vec3( 0.17, 0.17, 0.17 );',
+            '  } else if (pos >= 254.5) {',
+            '    color = vec3( 1.0, 1.0, 1.0 );',
+            '  } else {',
+            '    pos /= 255.0;',
+            '    if ( pos < ColorWheelStep ) {',
+            '      color = vec3( pos * 3.0, 1.0 - pos * 3.0, 0.0 );',
+            '    } else if( pos < ColorWheelStep * 2.0 ) {',
+            '      pos -= ColorWheelStep;',
+            '      color = vec3( 1.0 - pos * 3.0, 0.0, pos * 3.0 );',
+            '    } else {',
+            '      pos -= ColorWheelStep * 2.0;',
+            '      color = vec3( 0.0, pos * 3.0, 1.0 - pos * 3.0 );',
+            '    }',
+            '    color += vec3(ColorWheelStep);',
+            '  }',
+            '  color.r = pow(color.r, 2.2);',
+            '  color.g = pow(color.g, 2.2);',
+            '  color.b = pow(color.b, 2.2);',
+            '  return color;',
+            '}',
             '#include <common>',
           ].join('\n')
         )
         .replace(
           'vec4 diffuseColor = vec4( diffuse, opacity );',
-          'vec4 diffuseColor = vec4( diffuse * max(vInstanceIsOn, 0.02), opacity );'
+          'vec4 diffuseColor = vec4( diffuse * ColorWheel(vInstanceColor), opacity );'
         );
     };
     Display.material = material;
@@ -82,7 +107,7 @@ class Display extends InstancedMesh {
     }
     const count = (width * 4) * (height * 4);
     const geometry = Display.geometry.clone();
-    geometry.setAttribute('instanceIsOn', new InstancedBufferAttribute(new Float32Array(count), 1));
+    geometry.setAttribute('instanceColor', new InstancedBufferAttribute(new Float32Array(count), 1));
     super(
       geometry,
       Display.material,
@@ -132,29 +157,31 @@ class Display extends InstancedMesh {
 
   load(state) {
     const { geometry } = this;
-    const isOn = geometry.getAttribute('instanceIsOn');
+    const instances = geometry.getAttribute('instanceColor');
     state = atob(state);
-    for (let i = 0; i < isOn.count; i += 1) {
-      isOn.array[i] = state.charCodeAt(i);
+    for (let i = 0; i < instances.count; i += 1) {
+      instances.array[i] = state.charCodeAt(i);
     }
-    isOn.needsUpdate = true;
+    instances.needsUpdate = true;
   }
 
   togglePixel(x, y) {
     const { geometry, pixels } = this;
-    const isOn = geometry.getAttribute('instanceIsOn');
+    const instances = geometry.getAttribute('instanceColor');
     const index = (y * pixels.x) + x;
-    const state = isOn.array[index] ? 0 : 1;
-    isOn.array[index] = state;
-    isOn.needsUpdate = true;
-    return state;
+    const color = !instances.array[index] ? (
+      Math.random() > 0.5 ? 0xFF : Math.floor(Math.random() * 0xFF)
+    ) : 0;
+    instances.array[index] = color;
+    instances.needsUpdate = true;
+    return color;
   }
 
-  updatePixel(x, y, state) {
+  updatePixel(x, y, color) {
     const { geometry, pixels } = this;
-    const isOn = geometry.getAttribute('instanceIsOn');
-    isOn.array[(y * pixels.x) + x] = state;
-    isOn.needsUpdate = true;
+    const instances = geometry.getAttribute('instanceColor');
+    instances.array[(y * pixels.x) + x] = color;
+    instances.needsUpdate = true;
   }
 }
 
