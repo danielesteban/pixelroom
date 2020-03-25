@@ -1,5 +1,6 @@
 import {
   BufferGeometry,
+  Color,
   Line,
   LineBasicMaterial,
   Mesh,
