@@ -55,11 +55,9 @@ class Room {
     const index = clients.findIndex(({ id }) => (id === client.id));
     if (~index) {
       clients.splice(index, 1);
-      this.push({
-        event: {
-          type: 'LEAVE',
-          data: client.id,
-        },
+      this.broadcast({
+        type: 'LEAVE',
+        data: client.id,
       });
       if (!clients.length && pingInterval) {
         clearInterval(pingInterval);
@@ -80,11 +78,9 @@ class Room {
         peers: clients.map(({ id }) => (id)),
       },
     }), () => {});
-    this.push({
-      event: {
-        type: 'JOIN',
-        data: client.id,
-      },
+    this.broadcast({
+      type: 'JOIN',
+      data: client.id,
     });
     clients.push(client);
     client.isAlive = true;
@@ -117,14 +113,13 @@ class Room {
           || clients.findIndex(({ id }) => (id === peer)) === -1
         )) {
           if (client) {
-            this.push({
-              event: {
-                type: 'SIGNAL',
-                data: {
-                  peer: client.id,
-                  signal,
-                },
+            this.broadcast({
+              type: 'SIGNAL',
+              data: {
+                peer: client.id,
+                signal,
               },
+            }, {
               include: peer,
             });
           }
@@ -167,19 +162,7 @@ class Room {
     }
   }
 
-  ping() {
-    const { clients } = this;
-    clients.forEach((client) => {
-      if (client.isAlive === false) {
-        client.terminate();
-        return;
-      }
-      client.isAlive = false;
-      client.ping(() => {});
-    });
-  }
-
-  push({ event, exclude, include }) {
+  broadcast(event, { exclude, include } = {}) {
     const { clients } = this;
     const encoded = JSON.stringify(event);
     if (exclude && !Array.isArray(exclude)) {
@@ -198,6 +181,18 @@ class Room {
     });
   }
 
+  ping() {
+    const { clients } = this;
+    clients.forEach((client) => {
+      if (client.isAlive === false) {
+        client.terminate();
+        return;
+      }
+      client.isAlive = false;
+      client.ping(() => {});
+    });
+  }
+
   update({
     client,
     display,
@@ -206,15 +201,14 @@ class Room {
   }) {
     const { dimensions, displays } = this;
     displays[display][(dimensions.width * pixel.y) + pixel.x] = state;
-    this.push({
-      event: {
-        type: 'UPDATE',
-        data: {
-          display,
-          pixel,
-          state,
-        },
+    this.broadcast({
+      type: 'UPDATE',
+      data: {
+        display,
+        pixel,
+        state,
       },
+    }, {
       exclude: client,
     });
   }

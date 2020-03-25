@@ -29,4 +29,4 @@ server.use(express.static(path.join(__dirname, '..', 'client')));
 expressWS(server, null, { clientTracking: false, perMessageDeflate: true });
 server.ws('/', room.onClient.bind(room));
 server.use((req, res) => res.status(404).end());
-server.listen(process.env.PORT || 80);
+server.listen(process.env.PORT || 8080);
