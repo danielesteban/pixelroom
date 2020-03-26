@@ -9,22 +9,10 @@ class Scene extends ThreeScene {
   constructor({ camera, renderer: { xr } }) {
     super();
 
-    const listener = new AudioListener();
-    const onFirstInteraction = () => {
-      window.removeEventListener('mousedown', onFirstInteraction);
-      const { context } = listener;
-      if (context.state === 'suspended') {
-        context.resume();
-      }
-    };
-    window.addEventListener('mousedown', onFirstInteraction);
-    camera.add(listener);
-    this.listener = listener;
-
-    this.peers = new Peers({ listener });
+    this.peers = new Peers({ listener: camera.listener });
     this.add(this.peers);
 
-    this.player = new Player({ camera, listener, xr });
+    this.player = new Player({ camera, xr });
     this.player.controllers.forEach(({ marker }) => (
       this.add(marker)
     ));

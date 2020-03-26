@@ -23,7 +23,6 @@ class Player extends Object3D {
       rotation: new Quaternion(),
     };
 
-    this.camera = camera;
     this.add(camera);
 
     this.controllers = [...Array(2)].map((v, i) => {

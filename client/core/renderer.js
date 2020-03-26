@@ -1,4 +1,5 @@
 import {
+  AudioListener,
   Clock,
   PerspectiveCamera,
   sRGBEncoding,
@@ -22,6 +23,18 @@ class Renderer {
     // Setup camera
     this.camera = new PerspectiveCamera(90, 1, 0.1, 1000);
     this.camera.position.y = 1.5;
+
+    // Setup listener
+    this.camera.listener = new AudioListener();
+    this.camera.add(this.camera.listener);
+    const onFirstInteraction = () => {
+      mount.removeEventListener('mousedown', onFirstInteraction);
+      const { context } = this.camera.listener;
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+    };
+    mount.addEventListener('mousedown', onFirstInteraction);
 
     // Setup renderer
     {
