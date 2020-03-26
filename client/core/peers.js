@@ -89,6 +89,7 @@ class Peers extends Object3D {
       if (track.kind === 'audio') {
         if (!peer.audio) {
           peer.audio = new PositionalAudio(listener);
+          peer.audio.panner.panningModel = 'equalpower';
           peer.audio.setRefDistance(1);
           peer.audio.setDirectionalCone(180, 230, 0.1);
           peer.head.add(peer.audio);
