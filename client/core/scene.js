@@ -1,4 +1,4 @@
-import { Scene as ThreeScene } from './three.js';
+import { AudioListener, Scene as ThreeScene } from './three.js';
 import CurveCast from './curvecast.js';
 import Peers from './peers.js';
 import Player from './player.js';
@@ -9,10 +9,22 @@ class Scene extends ThreeScene {
   constructor({ camera, renderer: { xr } }) {
     super();
 
-    this.peers = new Peers();
+    const listener = new AudioListener();
+    const onFirstInteraction = () => {
+      window.removeEventListener('mousedown', onFirstInteraction);
+      const { context } = listener;
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+    };
+    window.addEventListener('mousedown', onFirstInteraction);
+    camera.add(listener);
+    // this.listener = listener;
+
+    this.peers = new Peers({ listener });
     this.add(this.peers);
 
-    this.player = new Player({ camera, xr });
+    this.player = new Player({ camera, listener, xr });
     this.player.controllers.forEach(({ marker }) => (
       this.add(marker)
     ));
