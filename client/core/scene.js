@@ -1,4 +1,4 @@
-import { AudioListener, Scene as ThreeScene } from './three.js';
+import { Scene as ThreeScene } from './three.js';
 import CurveCast from './curvecast.js';
 import Peers from './peers.js';
 import Player from './player.js';
