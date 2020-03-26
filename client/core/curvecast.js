@@ -3,10 +3,12 @@ import { Vector3 } from './three.js';
 const maxSteps = 5;
 
 const gravity = new Vector3(0, -1, 0);
-const dir = new Vector3();
-const pos = new Vector3();
-const step = new Vector3();
-const steps = [...Array(maxSteps + 2)].map(() => new Vector3());
+const next = new Vector3();
+const restore = {
+  direction: new Vector3(),
+  origin: new Vector3(),
+};
+const steps = [...Array(maxSteps + 1)].map(() => new Vector3());
 
 // Performs a "curved" raycast
 
@@ -18,29 +20,29 @@ export default function CurveCast({
   const points = [];
   let stride = 0.5;
   let hit = false;
-  dir.copy(direction);
-  pos.copy(origin);
-  step.copy(origin);
+  restore.direction.copy(direction);
+  restore.origin.copy(origin);
+  next.copy(origin);
   for (let i = 0; i < maxSteps; i += 1) {
     stride *= 2;
-    origin.copy(step);
+    origin.copy(next);
     points.push(steps[i].copy(origin));
-    step
+    next
       .copy(origin)
       .addScaledVector(direction, stride)
       .addScaledVector(gravity, (stride * stride) * 0.05);
     direction
-      .subVectors(step, origin);
+      .subVectors(next, origin);
     raycaster.far = i === maxSteps - 1 ? distance : direction.length();
     direction.normalize();
     hit = raycaster.intersectObjects(intersects)[0] || false;
     if (hit) {
-      points.push(steps[maxSteps + 1].copy(hit.point));
+      points.push(steps[maxSteps].copy(hit.point));
       break;
     }
   }
-  raycaster.ray.direction.copy(dir);
-  raycaster.ray.origin.copy(pos);
+  raycaster.ray.direction.copy(restore.direction);
+  raycaster.ray.origin.copy(restore.position);
   raycaster.far = distance;
   return { hit, points };
 }
