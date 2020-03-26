@@ -4,7 +4,6 @@
   "author": "Daniel Esteban Nombela",
   "license": "MIT",
   "version": "1.0.0",
-  "main": "server/main.js",
   "pre-commit": {
     "run": "lint",
     "silent": true
