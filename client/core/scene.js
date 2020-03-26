@@ -19,7 +19,7 @@ class Scene extends ThreeScene {
     };
     window.addEventListener('mousedown', onFirstInteraction);
     camera.add(listener);
-    // this.listener = listener;
+    this.listener = listener;
 
     this.peers = new Peers({ listener });
     this.add(this.peers);
