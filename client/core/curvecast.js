@@ -42,7 +42,7 @@ export default function CurveCast({
     }
   }
   raycaster.ray.direction.copy(restore.direction);
-  raycaster.ray.origin.copy(restore.position);
+  raycaster.ray.origin.copy(restore.origin);
   raycaster.far = distance;
   return { hit, points };
 }
