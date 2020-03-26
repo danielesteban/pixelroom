@@ -1,6 +1,6 @@
 
 import SimplePeer from './simplepeer.js';
-import { Object3D, PositionalAudio } from './three.js';
+import { Object3D } from './three.js';
 import Peer from '../renderables/peer.js';
 
 class Peers extends Object3D {
@@ -73,9 +73,9 @@ class Peers extends Object3D {
       initiator,
       stream: userMedia,
     });
-    const peer = new Peer({ peer: id, connection });
+    const peer = new Peer({ peer: id, connection, listener });
     connection.on('error', () => {});
-    connection.on('data', peer.update.bind(peer));
+    connection.on('data', peer.onUpdate.bind(peer));
     connection.on('signal', (signal) => (
       server.send(JSON.stringify({
         type: 'SIGNAL',
@@ -85,25 +85,7 @@ class Peers extends Object3D {
         },
       }))
     ));
-    connection.on('track', (track, stream) => {
-      if (track.kind === 'audio') {
-        if (!peer.audio) {
-          peer.audio = new PositionalAudio(listener);
-          peer.audio.setRefDistance(1);
-          peer.audio.setDirectionalCone(180, 230, 0.1);
-          peer.head.add(peer.audio);
-          const player = document.createElement('audio');
-          player.muted = true;
-          peer.audio.player = player;
-        } else {
-          peer.audio.source.mediaStream.getTracks().forEach((track) => track.stop());
-          peer.audio.disconnect();
-        }
-        peer.audio.setMediaStreamSource(stream);
-        peer.audio.player.srcObject = stream;
-        peer.audio.player.play();
-      }
-    });
+    connection.on('track', peer.onTrack.bind(peer));
     this.add(peer);
     return peer;
   }
@@ -127,15 +109,7 @@ class Peers extends Object3D {
     if (~index) {
       const [peer] = peers.splice(index, 1);
       this.remove(peer);
-      const { audio, connection } = peer;
-      if (audio) {
-        audio.source.mediaStream.getTracks().forEach((track) => track.stop());
-        audio.player.srcObject = null;
-        audio.disconnect();
-      }
-      if (!connection.destroyed) {
-        connection.destroy();
-      }
+      peer.dispose();
     }
   }
 
@@ -158,15 +132,7 @@ class Peers extends Object3D {
     const { peers } = this;
     peers.forEach((peer) => {
       this.remove(peer);
-      const { audio, connection } = peer;
-      if (audio) {
-        audio.source.mediaStream.getTracks().forEach((track) => track.stop());
-        audio.player.srcObject = null;
-        audio.disconnect();
-      }
-      if (!connection.destroyed) {
-        connection.destroy();
-      }
+      peer.dispose();
     });
     this.peers = [];
     delete this.server;

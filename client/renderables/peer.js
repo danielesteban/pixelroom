@@ -3,6 +3,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   Object3D,
+  PositionalAudio,
   SphereGeometry,
   VertexColors,
 } from '../core/three.js';
@@ -31,7 +32,7 @@ class Peer extends Object3D {
     });
   }
 
-  constructor({ peer, connection }) {
+  constructor({ peer, connection, listener }) {
     if (!Peer.geometry) {
       Peer.setupGeometry();
     }
@@ -39,7 +40,11 @@ class Peer extends Object3D {
       Peer.setupMaterial();
     }
     super();
-    this.peer = peer;
+    this.audio = new PositionalAudio(listener);
+    this.audio.setRefDistance(1);
+    this.audio.setDirectionalCone(180, 230, 0.1);
+    this.audio.player = new Audio();
+    this.audio.player.muted = true;
     this.connection = connection;
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = new Object3D();
@@ -54,10 +59,38 @@ class Peer extends Object3D {
       Peer.material
     );
     this.head.visible = false;
+    this.head.add(this.audio);
     this.add(this.head);
+    this.peer = peer;
   }
 
-  update({ buffer }) {
+  dispose() {
+    const { audio, connection } = this;
+    audio.player.srcObject = null;
+    if (audio.source) {
+      audio.source.mediaStream.getTracks().forEach((track) => track.stop());
+      audio.disconnect();
+    }
+    if (!connection.destroyed) {
+      connection.destroy();
+    }
+  }
+
+  onTrack(track, stream) {
+    const { audio } = this;
+    if (track.kind !== 'audio') {
+      return;
+    }
+    if (audio.source) {
+      audio.source.mediaStream.getTracks().forEach((track) => track.stop());
+      audio.disconnect();
+    }
+    audio.setMediaStreamSource(stream);
+    audio.player.srcObject = stream;
+    audio.player.play();
+  }
+
+  onUpdate({ buffer }) {
     const { controllers, head } = this;
     const view = new Float32Array(buffer);
     if (view.length >= 7) {
