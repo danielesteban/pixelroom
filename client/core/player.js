@@ -1,4 +1,5 @@
 import {
+  AudioListener,
   Matrix4,
   Object3D,
   Quaternion,
@@ -13,18 +14,21 @@ import Marker from '../renderables/marker.js';
 class Player extends Object3D {
   constructor({ camera, xr }) {
     super();
+    this.add(camera);
     this.auxMatrixA = new Matrix4();
     this.auxMatrixB = new Matrix4();
     this.auxVector = new Vector3();
     this.auxDestination = new Vector3();
     this.direction = new Vector3();
-    this.head = {
-      position: new Vector3(),
-      rotation: new Quaternion(),
+    this.head = new AudioListener();
+    const onFirstInteraction = () => {
+      window.removeEventListener('mousedown', onFirstInteraction);
+      const { context } = this.head;
+      if (context.state === 'suspended') {
+        context.resume();
+      }
     };
-
-    this.add(camera);
-
+    window.addEventListener('mousedown', onFirstInteraction);
     this.controllers = [...Array(2)].map((v, i) => {
       const controller = xr.getController(i);
       this.add(controller);
@@ -43,7 +47,7 @@ class Player extends Object3D {
       controller.raycaster.far = 16;
       controller.worldspace = {
         position: new Vector3(),
-        rotation: new Quaternion(),
+        quaternion: new Quaternion(),
       };
       controller.addEventListener('connected', ({ data: { handedness, gamepad } }) => {
         const hand = new Hand({ handedness });
@@ -72,7 +76,8 @@ class Player extends Object3D {
       position,
       speed,
     } = this;
-    camera.matrixWorld.decompose(head.position, head.rotation, vector);
+    camera.matrixWorld.decompose(head.position, head.quaternion, vector);
+    head.updateMatrixWorld();
     controllers.forEach(({
       buttons,
       hand,
@@ -106,7 +111,7 @@ class Player extends Object3D {
       });
       hand.animate({ delta });
       marker.visible = false;
-      matrixWorld.decompose(worldspace.position, worldspace.rotation, vector);
+      matrixWorld.decompose(worldspace.position, worldspace.quaternion, vector);
       rotation.identity().extractRotation(matrixWorld);
       raycaster.ray.origin
         .addVectors(

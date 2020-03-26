@@ -40,12 +40,12 @@ class Peers extends Object3D {
       .sort(({ hand: { handedness: a } }, { hand: { handedness: b } }) => b.localeCompare(a));
     const payload = new Float32Array([
       ...head.position.toArray(),
-      ...head.rotation.toArray(),
+      ...head.quaternion.toArray(),
       ...(hands.length === 2 ? (
-        hands.reduce((hands, { hand: { state }, worldspace: { position, rotation } }) => {
+        hands.reduce((hands, { hand: { state }, worldspace: { position, quaternion } }) => {
           hands.push(
             ...position.toArray(),
-            ...rotation.toArray(),
+            ...quaternion.toArray(),
             state
           );
           return hands;
@@ -89,7 +89,6 @@ class Peers extends Object3D {
       if (track.kind === 'audio') {
         if (!peer.audio) {
           peer.audio = new PositionalAudio(listener);
-          peer.audio.panner.panningModel = 'equalpower';
           peer.audio.setRefDistance(1);
           peer.audio.setDirectionalCone(180, 230, 0.1);
           peer.head.add(peer.audio);

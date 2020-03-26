@@ -9,14 +9,14 @@ class Scene extends ThreeScene {
   constructor({ camera, renderer: { xr } }) {
     super();
 
-    this.peers = new Peers({ listener: camera.listener });
-    this.add(this.peers);
-
     this.player = new Player({ camera, xr });
     this.player.controllers.forEach(({ marker }) => (
       this.add(marker)
     ));
     this.add(this.player);
+
+    this.peers = new Peers({ listener: this.player.head });
+    this.add(this.peers);
 
     this.translocables = [];
 
