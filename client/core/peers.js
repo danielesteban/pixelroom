@@ -8,9 +8,11 @@ class Peers extends Object3D {
     super();
     this.listener = listener;
     this.peers = [];
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(this.onUserMedia.bind(this))
-      .catch(() => {});
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(this.onUserMedia.bind(this))
+        .catch(() => {});
+    }
   }
 
   onAnimationTick({ delta, player }) {

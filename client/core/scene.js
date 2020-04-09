@@ -23,7 +23,7 @@ class Scene extends ThreeScene {
     this.connect();
   }
 
-  onBeforeRender({ animation: { delta } }, scene, camera) {
+  onBeforeRender({ animation: { delta }, xr }, scene, camera) {
     const {
       peers,
       player,
@@ -38,6 +38,7 @@ class Scene extends ThreeScene {
           forwardsUp,
           leftwardsDown,
           rightwardsDown,
+          secondaryDown,
         },
         hand,
         marker,
@@ -71,6 +72,9 @@ class Scene extends ThreeScene {
             marker.update({ hit, points });
           }
         }
+      }
+      if (secondaryDown) {
+        xr.getSession().end();
       }
     });
   }
