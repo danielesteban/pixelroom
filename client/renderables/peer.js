@@ -41,7 +41,6 @@ class Peer extends Object3D {
     }
     super();
     this.audio = new PositionalAudio(listener);
-    this.audio.setDirectionalCone(180, 230, 0.1);
     this.audio.player = new Audio();
     this.audio.player.muted = true;
     this.connection = connection;
